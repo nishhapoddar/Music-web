@@ -9,23 +9,14 @@ const seekBar = document.getElementById('seekBar');
 const songInfoElement = document.querySelector('.songinfo');
 const songTimeElement = document.getElementById('songTime');
 const recentListElement = document.getElementById('recentList');
-const libraryNameInput = document.getElementById('libraryNameInput');
-const createLibraryButton = document.getElementById('createLibraryBtn');
-const librarySelectElement = document.getElementById('librarySelect');
-const addToLibraryButton = document.getElementById('addToLibraryBtn');
-const libraryListElement = document.getElementById('libraryList');
-const selectedLibrarySongsElement = document.getElementById('selectedLibrarySongs');
 
 const RECENT_KEY = 'spotify_clone_recent_songs';
-const LIBRARIES_KEY = 'spotify_clone_libraries';
 
 const audio = new Audio();
 let songs = [];
 let currentIndex = 0;
 let isPlaying = false;
 let recentSongs = [];
-let libraries = [];
-let selectedLibraryId = null;
 let songSearchQuery = '';
 
 function updateLibraryHighlight() {
@@ -64,38 +55,6 @@ function persistRecentSongs() {
 	localStorage.setItem(RECENT_KEY, JSON.stringify(recentSongs));
 }
 
-function persistLibraries() {
-	localStorage.setItem(LIBRARIES_KEY, JSON.stringify(libraries));
-}
-
-function syncSelectOptions() {
-	librarySelectElement.innerHTML = '';
-
-	if (!libraries.length) {
-		const option = document.createElement('option');
-		option.value = '';
-		option.textContent = 'No libraries yet';
-		librarySelectElement.appendChild(option);
-		librarySelectElement.disabled = true;
-		return;
-	}
-
-	librarySelectElement.disabled = false;
-
-	libraries.forEach((library) => {
-		const option = document.createElement('option');
-		option.value = library.id;
-		option.textContent = library.name;
-		librarySelectElement.appendChild(option);
-	});
-
-	if (!selectedLibraryId || !libraries.some((library) => library.id === selectedLibraryId)) {
-		selectedLibraryId = libraries[0].id;
-	}
-
-	librarySelectElement.value = selectedLibraryId;
-}
-
 function renderRecentSongs() {
 	recentListElement.innerHTML = '';
 
@@ -125,175 +84,10 @@ function renderRecentSongs() {
 	});
 }
 
-function renderLibrarySongs(library) {
-	if (!library) {
-		selectedLibrarySongsElement.innerHTML = '<div class="empty-state">Select a library to see its songs</div>';
-		return;
-	}
-
-	const songsInLibrary = library.songIds
-		.map((songId) => getSongById(songId))
-		.filter(Boolean);
-
-	if (!songsInLibrary.length) {
-		selectedLibrarySongsElement.innerHTML = '<div class="empty-state">This library is empty</div>';
-		return;
-	}
-
-	selectedLibrarySongsElement.innerHTML = songsInLibrary
-		.map(
-			(song) => `
-				<div class="library-song-row">
-					<button class="library-play" data-song-id="${song.id}" type="button" aria-label="Play ${song.title}">▶</button>
-					<button class="library-song" data-song-id="${song.id}" type="button">
-						<span class="library-song-title">${song.title}</span>
-						<span class="library-song-artist">${getArtistName(song)}</span>
-					</button>
-					<button class="library-remove-song" data-song-id="${song.id}" type="button" aria-label="Remove ${song.title} from library">Remove</button>
-				</div>
-			`
-		)
-		.join('');
-
-	selectedLibrarySongsElement.querySelectorAll('.library-play').forEach((button) => {
-		button.addEventListener('click', (event) => {
-			event.stopPropagation();
-			const songId = Number(button.dataset.songId);
-			const songIndex = songs.findIndex((item) => item.id === songId);
-
-			if (songIndex !== -1) {
-				loadSong(songIndex);
-			}
-		});
-	});
-
-	selectedLibrarySongsElement.querySelectorAll('.library-song').forEach((button) => {
-		button.addEventListener('click', () => {
-			const songId = Number(button.dataset.songId);
-			const songIndex = songs.findIndex((item) => item.id === songId);
-
-			if (songIndex !== -1) {
-				loadSong(songIndex);
-			}
-		});
-	});
-
-	selectedLibrarySongsElement.querySelectorAll('.library-remove-song').forEach((button) => {
-		button.addEventListener('click', (event) => {
-			event.stopPropagation();
-			const songId = Number(button.dataset.songId);
-			const libraryIndex = libraries.findIndex((entry) => entry.id === library.id);
-
-			if (libraryIndex === -1) {
-				return;
-			}
-
-			libraries[libraryIndex].songIds = libraries[libraryIndex].songIds.filter((entry) => entry !== songId);
-			persistLibraries();
-			renderLibraries();
-		});
-	});
-}
-
-function renderLibraries() {
-	libraryListElement.innerHTML = '';
-
-	if (!libraries.length) {
-		libraryListElement.innerHTML = '<div class="empty-state">Create a library to save songs here</div>';
-		renderLibrarySongs(null);
-		syncSelectOptions();
-		return;
-	}
-
-	libraries.forEach((library) => {
-		const card = document.createElement('div');
-		card.className = `library-card${library.id === selectedLibraryId ? ' active' : ''}`;
-		card.innerHTML = `
-			<div class="library-card-copy">
-				<strong>${library.name}</strong>
-				<span>${library.songIds.length} songs</span>
-			</div>
-			<div class="library-card-actions">
-				<button class="library-open" type="button">Open</button>
-				<button class="library-delete" type="button" aria-label="Delete ${library.name}">Delete</button>
-			</div>
-		`;
-
-		card.querySelector('.library-open').addEventListener('click', (event) => {
-			event.stopPropagation();
-			selectedLibraryId = library.id;
-			syncSelectOptions();
-			renderLibraries();
-			renderLibrarySongs(library);
-		});
-
-		card.querySelector('.library-delete').addEventListener('click', (event) => {
-			event.stopPropagation();
-			libraries = libraries.filter((entry) => entry.id !== library.id);
-			if (selectedLibraryId === library.id) {
-				selectedLibraryId = libraries[0]?.id ?? null;
-			}
-			persistLibraries();
-			renderLibraries();
-		});
-
-		card.addEventListener('click', () => {
-			selectedLibraryId = library.id;
-			syncSelectOptions();
-			renderLibraries();
-			renderLibrarySongs(library);
-		});
-
-		libraryListElement.appendChild(card);
-	});
-
-	renderLibrarySongs(libraries.find((library) => library.id === selectedLibraryId) || libraries[0]);
-	syncSelectOptions();
-}
-
 function addSongToRecent(songId) {
 	recentSongs = [songId, ...recentSongs.filter((entry) => entry !== songId)].slice(0, 6);
 	persistRecentSongs();
 	renderRecentSongs();
-}
-
-function createLibrary(name) {
-	const trimmedName = name.trim();
-
-	if (!trimmedName) {
-		return;
-	}
-
-	const newLibrary = {
-		id: String(Date.now()),
-		name: trimmedName,
-		songIds: [],
-	};
-
-	libraries = [newLibrary, ...libraries];
-	selectedLibraryId = newLibrary.id;
-	persistLibraries();
-	renderLibraries();
-	libraryNameInput.value = '';
-}
-
-function addCurrentSongToLibrary() {
-	if (!libraries.length) {
-		createLibrary('My Library');
-	}
-
-	const library = libraries.find((entry) => entry.id === selectedLibraryId) || libraries[0];
-	const currentSong = songs[currentIndex];
-
-	if (!library || !currentSong) {
-		return;
-	}
-
-	if (!library.songIds.includes(currentSong.id)) {
-		library.songIds.unshift(currentSong.id);
-		persistLibraries();
-		renderLibraries();
-	}
 }
 
 function formatTime(seconds) {
@@ -466,19 +260,6 @@ audio.addEventListener('pause', () => {
 	updateLibraryHighlight();
 });
 
-createLibraryButton.addEventListener('click', () => {
-	createLibrary(libraryNameInput.value);
-});
-
-libraryNameInput.addEventListener('keydown', (event) => {
-	if (event.key === 'Enter') {
-		event.preventDefault();
-		createLibrary(libraryNameInput.value);
-	}
-});
-
-addToLibraryButton.addEventListener('click', addCurrentSongToLibrary);
-
 searchToggleButton.addEventListener('click', toggleSongSearchPanel);
 
 songSearchInput.addEventListener('input', () => {
@@ -495,11 +276,6 @@ songSearchInput.addEventListener('keydown', (event) => {
 	}
 });
 
-librarySelectElement.addEventListener('change', () => {
-	selectedLibraryId = librarySelectElement.value;
-	renderLibraries();
-});
-
 fetch('songs.json')
 	.then((response) => {
 		if (!response.ok) {
@@ -511,10 +287,8 @@ fetch('songs.json')
 	.then((data) => {
 		songs = data;
 		recentSongs = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
-		libraries = JSON.parse(localStorage.getItem(LIBRARIES_KEY) || '[]');
 		renderSongs();
 		renderRecentSongs();
-		renderLibraries();
 
 		if (songs.length) {
 			updateNowPlaying();

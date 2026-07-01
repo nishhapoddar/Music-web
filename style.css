@@ -1,4 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+:root{
+    --page-bg: #0f1115;
+    --surface: #1f1f1f;
+    --surface-strong: #141414;
+    --surface-soft: rgba(255, 255, 255, 0.05);
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.12);
+    --accent: #1db954;
+    --text-muted: #b0b0b0;
+    --panel-radius: 16px;
+    --playbar-space: 168px;
+}
 *{
     margin:0;
     padding:0;
@@ -11,11 +23,14 @@ body{
     overflow-x: hidden;
 }
 body{
-    background-color: black;
+    background: radial-gradient(circle at top, #1a1f26 0%, var(--page-bg) 45%, #050608 100%);
     color: white;
+    padding-bottom: calc(var(--playbar-space) + 16px);
 }
 .container{
     min-height: 100vh;
+    width: min(100%, 1600px);
+    margin: 0 auto;
     align-items: stretch;
 }
 .left{
@@ -24,6 +39,9 @@ body{
     padding: 10px;
     display: flex;
     flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
 
 }
 .right{
@@ -127,7 +145,7 @@ body{
     display: flex;
     flex-direction: column;
     gap: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-subtle);
 }
 .footer{
     display: flex;
@@ -149,7 +167,10 @@ body{
 .header{
     display: flex;
     justify-content: space-between;
-    background-color: rgb(55, 56, 58,0.51);
+    background: rgba(55, 56, 58, 0.51);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
     
 }
 .header > *{
@@ -162,11 +183,11 @@ body{
     min-height: 80vh;
     display: flex;
     flex-direction: column;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-subtle);
 }
 .dashboard{
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
     gap: 10px;
     margin: 8px 8px 8px;
     align-items: stretch;
@@ -174,7 +195,7 @@ body{
 .panel{
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 16px;
+    border-radius: var(--panel-radius);
     padding: 18px;
     min-height: clamp(220px, 30vh, 320px);
     backdrop-filter: blur(8px);
@@ -249,9 +270,9 @@ body{
 .library-remove-song{
     width: 100%;
     text-align: left;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--surface-soft);
     color: white;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-subtle);
     border-radius: 12px;
     padding: 10px 12px;
     cursor: pointer;
@@ -266,7 +287,7 @@ body{
     width: 46px;
     height: 46px;
     border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-subtle);
     background: rgba(29, 185, 84, 0.18);
     color: white;
     cursor: pointer;
@@ -390,7 +411,7 @@ body{
     overflow-y: auto;
 }
 .empty-state{
-    color: #b0b0b0;
+    color: var(--text-muted);
     font-size: 13px;
     padding: 10px 0;
 }
@@ -427,6 +448,13 @@ body{
 .loginbtn:hover{ 
     font-weight: bold;
     font-size: 17px;
+}
+
+.buttons{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 .playbar{
@@ -510,7 +538,7 @@ body{
 }
 .song-artist{
     font-size: 12px;
-    color: #b0b0b0;
+    color: var(--text-muted);
     line-height: 1.2;
 }
 .song-item:hover{
@@ -527,7 +555,7 @@ body{
 
 @media (max-width: 900px){
     body{
-        padding-bottom: 190px;
+        padding-bottom: calc(var(--playbar-space) + env(safe-area-inset-bottom));
     }
 
     .container{
@@ -541,6 +569,8 @@ body{
 
     .left{
         padding: 0;
+        position: static;
+        height: auto;
     }
 
     .right{
@@ -560,7 +590,7 @@ body{
 
     .spotifyplaylist{
         padding: 12px;
-        padding-bottom: 190px;
+        padding-bottom: calc(var(--playbar-space) + env(safe-area-inset-bottom));
     }
 
     .header{
@@ -640,7 +670,7 @@ body{
 
 @media (max-width: 600px){
     body{
-        padding-bottom: 176px;
+        padding-bottom: calc(156px + env(safe-area-inset-bottom));
     }
 
     .home,
@@ -709,6 +739,7 @@ body{
 
     .buttons{
         width: 100%;
+        gap: 10px;
     }
 }
 
