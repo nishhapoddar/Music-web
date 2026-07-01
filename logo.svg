@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Music note logo" height="32">
+	<title>Music Note</title>
+	<defs>
+		<linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+			<stop offset="0%" stop-color="#1db954" />
+			<stop offset="100%" stop-color="#0f7a3a" />
+		</linearGradient>
+	</defs>
+	<rect x="4" y="4" width="56" height="56" rx="16" fill="#121212" />
+	<circle cx="24" cy="46" r="8" fill="url(#logoGrad)" />
+	<circle cx="44" cy="42" r="8" fill="url(#logoGrad)" />
+	<path d="M28 18v28c0 2.2-2.2 4-5 4s-5-1.8-5-4 2.2-4 5-4c1 0 1.9.2 2.7.7V18l22-5v25c0 2.2-2.2 4-5 4s-5-1.8-5-4 2.2-4 5-4c1 0 1.9.2 2.7.7V15.7L28 18z" fill="url(#logoGrad)" />
+</svg>
