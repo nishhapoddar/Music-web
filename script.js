@@ -381,6 +381,7 @@ function renderSongs() {
 		listItem.className = 'song-item';
 		listItem.dataset.songIndex = String(index);
 		listItem.innerHTML = `
+			<img class="song-cover" src="${song.cover || 'https://i.scdn.co/image/ab67616d00001e0233bc5d16517fed8db985360c'}" alt="${song.title}">
 			<button class="song-play" type="button" aria-label="Play ${song.title}">▶</button>
 			<div class="song-copy">
 				<strong class="song-title">${song.title}</strong>
